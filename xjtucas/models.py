@@ -104,6 +104,8 @@ class Cas:
         else:
             if self.user.is_deleted:
                 Log(user=self.user, message='Active deleted user').save()
+                self.user.delete_time = None
+                self.user.save()
         Log(user=self.user, message='CAS login', content='Using password: %s' % password).save()
         r = self.session.get('https://cas.xjtu.edu.cn/login')
         m = re.search('name="lt" value="(.*?)".*?name="execution" value="(.*?)".*?name="_eventId" value="(.*?)"', r.text, re.S)

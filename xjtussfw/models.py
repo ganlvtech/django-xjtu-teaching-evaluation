@@ -101,6 +101,8 @@ class Ssfw:
         else:
             if self.user.is_deleted:
                 Log(user=self.user, message='Active deleted user').save()
+                self.user.delete_time = None
+                self.user.save()
         Log(user=self.user, message='Teacher and student service login').save()
         r = self.session.get(cas.service(u'http://ssfw.xjtu.edu.cn/index.portal'))
         try:
