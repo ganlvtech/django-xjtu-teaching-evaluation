@@ -8,7 +8,7 @@ import requests
 from django.db import models
 from django.utils import timezone
 
-from common.models import html_to_text
+from common.models import html_to_text, encoded_dict
 from xjtussfw.models import User as SsfwUser, Ssfw
 
 
@@ -159,7 +159,7 @@ class Course:
         Log(user=self.user, message='One course load page ok').save()
         try:
             post_url = 'http://ssfw.xjtu.edu.cn/index.portal' + re.search('post" action="(.*?)"', t).group(1)
-            post_fields = urllib.urlencode({
+            post_fields = urllib.urlencode(encoded_dict({
                 'wid_pgjxb': re.search('wid_pgjxb" value="(.*?)"', t).group(1),
                 'wid_pgyj': re.search('wid_pgyj" value="(.*?)"', t).group(1),
                 'type': 2,
@@ -169,23 +169,23 @@ class Course:
                 'status': re.search('status" value="(.*?)"', t).group(1),
                 'ztpj': self.faker(),
                 'sfmxpj': re.search('sfmxpj" value="(.*?)"', t).group(1)
-            })
+            }))
             trs = re.finditer(u'教师评价(.*?)</tr>', t, re.S)
             for tr in trs:
                 t1 = tr.group(1)
                 m_wid = re.search('(wid_.*?)" type="hidden" value="(.*?)"', t1)
                 m_qz = re.search('(qz_.*?)" type="hidden" value="(.*?)"', t1)
                 m_pfdj = list(re.finditer('(pfdj_.*?)"  value="(.*?)"', t1))[random.randint(0, 1)]
-                post_fields += '&' + urllib.urlencode({
+                post_fields += '&' + urllib.urlencode(encoded_dict({
                     'zbbm': re.search('zbbm" type="hidden" value="(.*?)"', t1).group(1),
                     m_wid.group(1): m_wid.group(2),
                     m_qz.group(1): m_qz.group(2),
                     m_pfdj.group(1): m_pfdj.group(2),
-                })
-            post_fields += '&' + urllib.urlencode({
+                }))
+            post_fields += '&' + urllib.urlencode(encoded_dict({
                 'pgyj': self.faker(),
                 'actionType': 2
-            })
+            }))
         except AttributeError:
             raise SessionExpiredError()
         Log(user=self.user, message='One course build form ok', content='POST url: %s\nPOST body: %s' % (post_url, post_fields)).save()
