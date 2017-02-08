@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 import xjtussfw.views
-from common.models import shadow_username, get_full_path
+from common.models import shadow_string, get_full_path, shadow_log
 from xjtupj.tasks import evaluate
 from xjtussfw.models import Ssfw
 from .models import Pj, Log, SessionExpiredError
@@ -29,7 +29,8 @@ def index(request):
         log_objects = reversed(Log.objects.all().order_by('-id')[:25])
         logs = log_objects_to_dict(log_objects)
         for l in logs:
-            l['user'] = shadow_username(l['user'])
+            l['user'] = shadow_string(l['user'])
+            l['message'] = shadow_log(l['message'])
         return render(request, 'xjtupj/index.html', {'login': False, 'logs': logs})
     pj = Pj()
     pj.from_dict(request.session['pj'])

@@ -2,6 +2,7 @@
 import datetime
 import random
 import re
+import traceback
 import urllib
 
 import requests
@@ -46,7 +47,7 @@ class User(models.Model):
             return False
         if self.is_locked:
             self.unlock()
-        Log(user=self, message='User deleted').save()
+        Log(user=self, message=u'删除用户').save()
         self.delete_time = timezone.now()
         self.save()
         return True
@@ -56,7 +57,7 @@ class User(models.Model):
         if self.delete_time is not None:
             return True
         elif self.user.is_deleted:
-            Log(user=self, message='User invalid').save()
+            Log(user=self, message=u'用户已失效').save()
             self.delete_time = self.user.delete_time
             self.save()
             return True
@@ -66,7 +67,7 @@ class User(models.Model):
         """自动登录评教系统"""
         pj = Pj()
         if self.is_deleted:
-            Log(user=self, message='Attempted to login deleted user').save()
+            Log(user=self, message=u'尝试登录已删除用户').save()
             raise UseDeletedUserError(self)
         pj.login(self.user.login())
         return pj
@@ -83,13 +84,13 @@ class User(models.Model):
 
     def lock(self):
         """加锁"""
-        Log(user=self, message='User locked').save()
+        Log(user=self, message=u'评教开始，用户已加锁').save()
         self.lock_time = timezone.now()
         self.save()
 
     def unlock(self):
         """解锁"""
-        Log(user=self, message='User unlocked').save()
+        Log(user=self, message=u'评教结束，用户已解锁').save()
         self.lock_time = None
         self.save()
 
@@ -109,7 +110,7 @@ class Log(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.message
+        return self.message.encode('utf-8')
 
 
 class Course:
@@ -142,7 +143,7 @@ class Course:
     @property
     def text(self):
         """文字版课程详情"""
-        return u'School: %s\nCode: %s\nName: %s\nTimes: %s\nTeacher: %s\nType: %s\nStatus: %s' % (self.school, self.code, self.name, self.times, self.teacher, self.type, self.status)
+        return u'周次: %s\n院系: %s\n课程代码: %s\n课程名称: %s\n已评次数: %s\n教师: %s\n教师类别: %s\n本周评教状态: %s' % (self.week, self.school, self.code, self.name, self.times, self.teacher, self.type, self.status)
 
     def faker(self):
         """生成总体评价、评估意见"""
@@ -150,15 +151,15 @@ class Course:
 
     def evaluate(self):
         """本门课程评教，返回是否评教"""
-        Log(user=self.user, message='One course start evaluating', content=self.text).save()
         if self.is_finished:
-            Log(user=self.user, message='One course already evaluated').save()
+            Log(user=self.user, message=u'课程已评过: %s' % self.name, content=self.text).save()
             return False
         if not self.url:
-            Log(user=self.user, message='One course cannot evaluate').save()
+            Log(user=self.user, message=u'课程无法评教: %s' % self.name, content=self.text).save()
             return False
+        Log(user=self.user, message=u'课程评教开始: %s' % self.name, content=self.text).save()
         t = self.session.get(self.url).text
-        Log(user=self.user, message='One course load page ok').save()
+        Log(user=self.user, message=u'读取课程评教页面成功').save()
         try:
             post_url = 'http://ssfw.xjtu.edu.cn/index.portal' + re.search('post" action="(.*?)"', t).group(1)
             post_fields = urllib.urlencode(encoded_dict({
@@ -190,9 +191,9 @@ class Course:
             }))
         except AttributeError:
             raise SessionExpiredError()
-        Log(user=self.user, message='One course build form ok', content='POST url: %s\nPOST body: %s' % (post_url, post_fields)).save()
+        Log(user=self.user, message=u'构造评教表单完成', content='POST url: %s\nPOST body: %s' % (post_url, post_fields)).save()
         self.session.post(post_url, data=post_fields)
-        Log(user=self.user, message='One course evaluation ok').save()
+        Log(user=self.user, message=u'课程评教成功').save()
         return True
 
 
@@ -251,14 +252,14 @@ class Pj:
         self.user, created = User.objects.get_or_create(user=ssfw.user)
         if created:
             self.user.save()
-            Log(user=self.user, message='Create user').save()
+            Log(user=self.user, message=u'创建账户').save()
         else:
             if self.user.is_deleted:
-                Log(user=self.user, message='Active deleted user').save()
+                Log(user=self.user, message=u'激活已删除用户').save()
                 self.user.delete_time = None
                 self.user.save()
         self.session.cookies = ssfw.session.cookies
-        Log(user=self.user, message='Get teaching evaluation list').save()
+        Log(user=self.user, message=u'获取课程列表开始').save()
         t = self.session.get('http://ssfw.xjtu.edu.cn/index.portal?.p=Znxjb20ud2lzY29tLnBvcnRhbC5zaXRlLmltcGwuRnJhZ21lbnRXaW5kb3d8ZjExNjF8dmlld3xub3JtYWx8YWN0aW9uPXF1ZXJ5').text
         try:
             self.week = html_to_text(re.search('pc_df".*value="(.*?)"', t).group(1))
@@ -283,7 +284,7 @@ class Pj:
                 self.courses.append(c)
         except AttributeError:
             raise SessionExpiredError()
-        Log(user=self.user, message='Get teaching evaluation list ok').save()
+        Log(user=self.user, message=u'获取课程列表成功: %s' % self.week).save()
 
     def evaluate(self):
         """自动评教"""
@@ -291,15 +292,15 @@ class Pj:
             return False
         if not self.courses:
             return False
-        Log(user=self.user, message='Auto teaching evaluate start').save()
+        Log(user=self.user, message=u'自动评教开始').save()
         self.user.lock()
         try:
             for course in self.courses:
                 course.evaluate()
         except Exception as e:
-            Log(user=self.user, message='Auto teaching evaluating error', content='Error message: %s\nTraceback:\n%s' % (e.message, traceback.format_exc())).save()
+            Log(user=self.user, message=u'自动评教出错', content='Error message: %s\nTraceback:\n%s' % (e.message, traceback.format_exc())).save()
             return False
         finally:
             self.user.unlock()
-        Log(user=self.user, message='Auto teaching evaluate finished').save()
+        Log(user=self.user, message=u'自动评教结束').save()
         return True
