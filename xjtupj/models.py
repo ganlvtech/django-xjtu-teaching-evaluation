@@ -44,6 +44,8 @@ class User(models.Model):
         """使用户无效"""
         if self.is_deleted:
             return False
+        if self.is_locked:
+            self.unlock()
         Log(user=self, message='User deleted').save()
         self.delete_time = timezone.now()
         self.save()
@@ -132,7 +134,7 @@ class Course:
     @property
     def is_finished(self):
         """是否已评教"""
-        return self.status == u'已评教'
+        return self.status == u'已提交'
 
     def __str__(self):
         return self.name
@@ -291,8 +293,13 @@ class Pj:
             return False
         Log(user=self.user, message='Auto teaching evaluate start').save()
         self.user.lock()
-        for course in self.courses:
-            course.evaluate()
-        self.user.unlock()
+        try:
+            for course in self.courses:
+                course.evaluate()
+        except Exception as e:
+            Log(user=self.user, message='Auto teaching evaluating error', content='Error message: %s\nTraceback:\n%s' % (e.message, traceback.format_exc())).save()
+            return False
+        finally:
+            self.user.unlock()
         Log(user=self.user, message='Auto teaching evaluate finished').save()
         return True
