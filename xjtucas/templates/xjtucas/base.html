@@ -1,0 +1,51 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    {% if redirect %}
+        <meta http-equiv="refresh" content="1; url={{ redirect }}">
+    {% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>统一身份认证网关</title>
+    <link rel="icon" href="{% static 'xjtucas/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'xjtucas/css/style.css' %}">
+</head>
+<body>
+    <header class="no-select">
+        <img src="{% static 'xjtucas/images/xjtu_logo.png' %}" alt="西安交通大学logo">
+        <h1>统一身份认证网关</h1>
+    </header>
+    <main>
+        <div class="main-left">
+            <div class="banner no-select">
+                <img src="{% static 'xjtucas/images/banner.jpg' %}" alt="天地交而万物通 上下交则其志同">
+                <a href="http://202.117.1.227:8080/ViewHistoryPhotoApp.html" target="_blank">查看更多&gt;&gt;</a>
+            </div>
+            <div class="safety-tips">出于安全考虑，一旦您访问过那些需要您提供凭证信息的应用时，请操作完成之后关闭浏览器。</div>
+        </div>
+        <div class="main-right">
+            <a class="protected-app no-select" href="http://u.xjtu.edu.cn/web/service/index.jsp">受保护的应用</a>
+            <h2 class="no-select">用户登录</h2>
+            {% block content %}
+                <div class="content"></div>
+            {% endblock %}
+            <div class="active-tips">如果第一次登陆，请先点击下面相应链接进行激活</div>
+            <div class="active-links">
+                <ul>
+                    <li><a href="http://u.xjtu.edu.cn/validateRegEmpAnonyAction.do?flag_todo=firstStep">激活教职工NetID</a></li>
+                    <li><a href="http://u.xjtu.edu.cn/validateRegRetireAnonyAction.do?flag_todo=firstStep">激活离退休人员NetID</a></li>
+                    <li><a href="http://u.xjtu.edu.cn/validateRegStuAnonyAction.do?flag_todo=firstStep">激活学生NetID</a></li>
+                    <li><a href="http://u.xjtu.edu.cn/validateRegTempAnonyAction.do?flag_todo=firstStep">激活其他人员NetID</a></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <div class="copyright">
+            <p>开发维护：西安交通大学网络中心</p>
+            <p>联系电话：029-82668827<span style="color: #fff;">高清重置</span></p>
+        </div>
+    </footer>
+</body>
+</html>

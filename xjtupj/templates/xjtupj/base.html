@@ -1,0 +1,50 @@
+{% load staticfiles %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if redirect %}
+        <meta http-equiv="refresh" content="1; url={{ redirect }}">
+    {% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>交大云评教</title>
+    <link rel="icon" href="{% static 'xjtupj/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'xjtupj/css/style.css' %}">
+</head>
+<body>
+    <div class="cover"></div>
+    <h1 class="title"><a href="{% url 'xjtupj.views.index' %}">交大云评教</a></h1>
+    <header class="btn-box">
+        <h2>账户操作</h2>
+        <ul>
+            {% if login %}
+                <li><a href="{% url 'xjtupj.views.login' %}">刷新</a></li>
+                <li><a href="{% url 'xjtupj.views.logout' %}">退出</a></li>
+                <li><a href="{% url 'xjtupj.views.invalidate' %}">完全退出</a></li>
+            {% else %}
+                <li><a href="{% url 'xjtupj.views.login' %}">登录</a></li>
+            {% endif %}
+        </ul>
+    </header>
+    {% block content %}
+    {% endblock %}
+    <footer class="link-box">
+        <h2>相关链接</h2>
+        <ul>
+            <li><a target="_blank" href="http://ssfw.xjtu.edu.cn/">西安交通大学师生服务</a></li>
+            <li><a target="_blank" href="http://dean.xjtu.edu.cn/">西安交通大学教务处</a></li>
+            <li><a target="_blank" href="http://www.xjtu.edu.cn/">西安交通大学</a></li>
+            <li><a target="_blank" href="http://www.eeyes.net/">西安交通大学e瞳网</a></li>
+            <li><a target="_blank" href="https://www.tiaozhan.com/">西安交通大学团委挑战网</a></li>
+            <li><a target="_blank" href="https://ana.xjtu.edu.cn/">西交Link</a></li>
+            <li><a target="_blank" href="http://xjtu.link/">西安交通大学学生网络管理协会</a></li>
+            <li><a target="_blank" href="http://github.com/ganlvtech/django-xjtu-teaching-evaluation">Source on GitHub</a></li>
+        </ul>
+    </footer>
+    <div class="copyright">
+        背景图片：「<a target="_blank" href="http://www.pixiv.net/member_illust.php?mode=medium&amp;illust_id=60731627">ホワイトラブ</a>」
+        图片作者：<a target="_blank" href="http://www.pixiv.net/member.php?id=7640889">あさひ＠KYD</a>
+        图片来源：<a target="_blank" href="http://www.pixiv.net/">pixiv</a> <a target="_blank" href="http://www.bilibilijj.com/">哔哩哔哩唧唧</a>
+        <a onclick="document.getElementsByClassName('copyright')[0].style.display='none';">隐藏底栏</a>
+    </div>
+</body>
+</html>

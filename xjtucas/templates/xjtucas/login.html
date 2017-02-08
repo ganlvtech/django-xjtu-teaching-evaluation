@@ -1,0 +1,35 @@
+{% extends "xjtucas/base.html" %}
+{% block content %}
+    {% if err_msgs %}
+        <div class="error">
+            {% for err_msg in err_msgs %}
+                <p>{{ err_msg }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="content">
+        <form class="login-form" method="post">
+            {% csrf_token %}
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr class="login-label">
+                        <td><label for="username">NetID</label></td>
+                    </tr>
+                    <tr class="login-input">
+                        <td><input type="text" id="username" name="username"{% if username %} value="{{ username }}"{% endif %}></td>
+                    </tr>
+                    <tr class="login-label">
+                        <td><label for="password">密　码</label></td>
+                    </tr>
+                    <tr class="login-input">
+                        <td><input type="password" id="password" name="password"></td>
+                        <td class="forgot-password"><a href="http://u.xjtu.edu.cn/rePasswordAnonyAction.do">忘记密码</a></td>
+                    </tr>
+                    <tr class="login-submit">
+                        <td><input type="submit" value="登录"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+{% endblock %}

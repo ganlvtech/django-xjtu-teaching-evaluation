@@ -1,0 +1,69 @@
+{% extends "xjtupj/base.html" %}
+{% block content %}
+    <section class="box">
+        <h2>“交大云评教”使用说明：</h2>
+        <p>1. 点击“登录”按钮，使用CAS登录（由于需要获取一些数据，可能需要十几秒）</p>
+        <p>2. 使用CAS登录后，后台会自动开始第一次自动评教</p>
+        <p>3. 使用CAS登录后，回到本页面可以查看评教信息</p>
+        <p>4. 本页面的信息是登录时缓存下来的，单纯刷新页面不能刷新数据，请点击“刷新”按钮刷新缓存</p>
+        <p>5. 点击“退出”按钮可以退出登录，但是后台仍会每天检查一次评教情况，如果发现未评教课程会进行评教</p>
+        <p>6. 点击“完全退出”按钮可以退出登录并完全停止后台自动评教</p>
+        <p>7. 本页面仅供学习交流使用，查看源代码请点击“Source on GitHub”，如果喜欢可以给一个Star</p>
+        <p>8. 后台自动评教从每天凌晨2点开始，依次检查为每个处于激活状态的用户进行自动评教</p>
+    </section>
+    {% if login %}
+        {% if pj.user.is_locked %}
+            <section class="box">
+                <p>您的账户目前正在后台自动评教，当前课程信息是缓存，您可以在一段时间之后刷新页面</p>
+            </section>
+        {% endif %}
+        <section class="box">
+            <h2>{{ pj.week }}</h2>
+            <p>以下课程信息是服务器缓存，您需要点击“刷新”按钮才能刷新缓存</p>
+            <table border="0" cellpadding="0" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>课程名称</th>
+                        <th>教师</th>
+                        <th>已评次数</th>
+                        <th>本周状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in pj.courses %}
+                        <tr>
+                            <td>{{ course.name }}</td>
+                            <td>{{ course.teacher }}</td>
+                            <td>{{ course.times }}</td>
+                            <td>{{ course.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    {% endif %}
+    <section class="box">
+        <h2>操作记录</h2>
+        <p>这里记录了账号的各类操作（仅显示最后25条）</p>
+        <table border="0" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>NetID</th>
+                    <th>记录信息</th>
+                    <th>记录时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.user }}</td>
+                        <td>{{ log.message }}</td>
+                        <td>{{ log.create_time }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
